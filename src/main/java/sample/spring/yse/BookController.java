@@ -9,41 +9,66 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-@Controller 
+@Controller
 public class BookController {
 	@Autowired
 	BookService bookService;
-	
-	@RequestMapping(value="/create", method = RequestMethod.GET)
+
+	@RequestMapping(value = "/create", method = RequestMethod.GET)
 	public ModelAndView create() {
-	    return new ModelAndView("book/create");
+		return new ModelAndView("book/create");
 	}
-	
+
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
 	public ModelAndView createPost(@RequestParam Map<String, Object> map) {
-	    ModelAndView mav = new ModelAndView();
+		ModelAndView mav = new ModelAndView();
 
-	    String bookId = this.bookService.create(map);
-	    if (bookId == null) {
-	        mav.setViewName("redirect:/create");
-	    }else {
-	        mav.setViewName("redirect:/detail?bookId=" + bookId); 
-	    }  
+		String bookId = this.bookService.create(map);
+		if (bookId == null) {
+			mav.setViewName("redirect:/create");
+		} else {
+			mav.setViewName("redirect:/detail?bookId=" + bookId);
+		}
 
-	    return mav;
+		return mav;
 	}
-	
+
 	@RequestMapping(value = "/detail", method = RequestMethod.GET)
 	public ModelAndView detail(@RequestParam Map<String, Object> map) {
-	    Map<String, Object> detailMap = this.bookService.detail(map);
+		Map<String, Object> detailMap = this.bookService.detail(map);
 
-	    ModelAndView mav = new ModelAndView();
-	    mav.addObject("data", detailMap);
-	    String bookId = map.get("bookId").toString();
-	    mav.addObject("bookId", bookId);
-	    mav.setViewName("/book/detail");
-	    return mav;
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("data", detailMap);
+		String bookId = map.get("bookId").toString();
+		mav.addObject("bookId", bookId);
+		mav.setViewName("/book/detail");
+		return mav;
+	}
+
+	@RequestMapping(value = "/update", method = RequestMethod.GET)
+	public ModelAndView update(@RequestParam Map<String, Object> map) {
+		Map<String, Object> detailMap = this.bookService.detail(map);
+
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("data", detailMap);
+		mav.setViewName("/book/update");
+		return mav;
+	}
+
+	@RequestMapping(value = "update", method = RequestMethod.POST)
+	public ModelAndView updatePost(@RequestParam Map<String, Object> map) {
+		ModelAndView mav = new ModelAndView();
+
+		boolean isUpdateSuccess = this.bookService.edit(map);
+		if (isUpdateSuccess) {
+			String bookId = map.get("bookId").toString();
+			mav.setViewName("redirect:/detail?bookId=" + bookId);
+		} else {
+			mav = this.update(map);
+		}
+		
+//		System.out.println(map);
+
+		return mav;
 	}
 }
-
-
